@@ -502,7 +502,7 @@ const generateBookCover = (
       }
     }
     
-    return `https://picsum.photos/id/${imageId}/${width}/${height}${effect}?author=${safeAuthorName}`;
+    return `https://picsum.photos/seed/${bookSeed}-${imageId}/${width}/${height}${effect}?author=${safeAuthorName}`;
   } else {
     const uniqueSeed = `${bookSeed}-${titleLanguage}-${bookGenre}-${imageIndex}-${genreVariant}`;
 

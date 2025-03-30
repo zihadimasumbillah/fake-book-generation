@@ -12,9 +12,10 @@ module.exports = {
         foreground: "var(--foreground)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)"],
-        mono: ["var(--font-mono)"],
+        sans: ["var(--font-geist-sans)", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "monospace"],
       },
     },
   },
+  plugins: [],
 };
