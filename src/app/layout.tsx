@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fake Book Store Generator",
+  title: "Fake Book Generator",
   description: "Generate realistic fake book data for testing",
 };
 
