@@ -37,7 +37,7 @@ export default function BookGallery({ books, loading }: BookGalleryProps) {
                 className="object-cover"
                 loading={index < 10 ? "eager" : "lazy"}
                 priority={index < 4}
-                onError={(e) => {
+                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                   const target = e.target as HTMLImageElement;
                   const titleHash = book.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
                   const hue = titleHash % 360;
