@@ -5,21 +5,28 @@ import { fakerDE as de, fakerFR as fr, fakerEN_US as en } from '@faker-js/faker'
 
 type SupportedLocale = 'en' | 'de' | 'fr';
 
-const applyTimes = <T>(n: number, fn: (arg: T) => T, initial: T, rng: () => number): T => {
+/**
+ * Applies a function n times, where n can be a non-integer value.
+ * If n has a fractional part, the function will be applied that many times,
+ * and then once more with probability equal to the fractional part.
+ */
+function applyTimes<T>(n: number, fn: (arg: T) => T, initial: T, rng: () => number): T {
   let result = initial;
   
+  // Apply function for whole part
   const wholePart = Math.floor(n);
   for (let i = 0; i < wholePart; i++) {
     result = fn(result);
   }
 
+  // Potentially apply one more time based on fractional part
   const fractionalPart = n - wholePart;
   if (fractionalPart > 0 && rng() < fractionalPart) {
     result = fn(result);
   }
   
   return result;
-};
+}
 
 function getFakerByLocale(locale: string, seed?: string): typeof faker {
   let localizedFaker;
@@ -393,7 +400,7 @@ const generateBookCover = (
 ): string => {
   const coverRng = seedrandom(`${bookSeed}-cover`);
 
-  const width = 300;
+  const width = 400;
   const height = 450;
 
   const titleHash = title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -835,6 +842,7 @@ const generatePublisher = (
 const generateLikes = (averageLikes: number, rng: () => number): number => {
   const sanitizedAverageLikes = isNaN(averageLikes) ? 0 : Math.max(0, averageLikes);
 
+  // Apply the "add one like" function averageLikes times (which might be fractional)
   return applyTimes(
     sanitizedAverageLikes,
     (count) => count + 1,
@@ -884,6 +892,7 @@ const generateReviews = (
   title: string
 ): Review[] => {
   const sanitizedAverageReviews = isNaN(averageReviews) ? 0 : Math.max(0, averageReviews);
+
   const reviewCount = applyTimes(
     sanitizedAverageReviews,
     (count) => count + 1,
@@ -903,8 +912,10 @@ const generateReviews = (
 
     const pubDate = new Date(publicationDate);
     const currentDate = new Date();
-    const reviewTimeGap = reviewRng() * (currentDate.getTime() - pubDate.getTime());
-    const reviewDate = new Date(pubDate.getTime() + reviewTimeGap);
+    const minReviewDate = new Date('1990-01-01');
+    const earliestDate = pubDate > minReviewDate ? pubDate : minReviewDate;
+    const reviewTimeGap = reviewRng() * (currentDate.getTime() - earliestDate.getTime());
+    const reviewDate = new Date(earliestDate.getTime() + reviewTimeGap);
 
     let rating;
     const ratingRoll = reviewRng();

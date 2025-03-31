@@ -16,6 +16,7 @@ export default function Home() {
   const [averageReviews, setAverageReviews] = useState<number>(2.0);
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [viewMode, setViewMode] = useState<'table' | 'gallery'>('table');
   
@@ -27,6 +28,7 @@ export default function Home() {
   const fetchBooks = useCallback(async (page: number, reset: boolean = false) => {
     try {
       setLoading(true);
+      setError(null);
     
       const params = {
         language,
@@ -46,6 +48,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error fetching books:', error);
+      setError('Failed to load books. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -60,12 +63,10 @@ export default function Home() {
     const reviews = !isNaN(value) ? Math.max(0, Math.min(10, value)) : 0;
     setAverageReviews(reviews);
   }, []);
-  
   useEffect(() => {
     fetchBooks(1, true);
     setCurrentPage(1);
   }, [language, seed, averageLikes, averageReviews, fetchBooks]);
-  
   useEffect(() => {
     if (inView && !loading && currentPage > 0) {
       const nextPage = currentPage + 1;
@@ -74,7 +75,6 @@ export default function Home() {
     }
   }, [inView, loading, currentPage, fetchBooks]);
   
-
   const generateRandomSeed = useCallback(() => {
     const randomSeed = Math.floor(Math.random() * 1000000).toString();
     setSeed(randomSeed);
@@ -89,11 +89,12 @@ export default function Home() {
       Authors: book.authors.join(', '),
       Publisher: book.publisher,
       Likes: book.likes,
-      Reviews: book.reviews.length
+      Reviews: book.reviews.length,
+      PublishedDate: new Date(book.publicationDate).toLocaleDateString(),
+      Pages: book.pageCount
     }));
 
     const csv = Papa.unparse(csvData);
-
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
@@ -106,8 +107,8 @@ export default function Home() {
   }, [books, language, seed]);
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Fake Book Generator</h1>
+    <div className="max-w-full px-2 md:px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6 text-center">Fake Book Generator</h1>
       
       <ControlPanel
         language={language}
@@ -124,6 +125,12 @@ export default function Home() {
         onExportCSV={exportToCSV}
       />
       
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+      
       {viewMode === 'table' ? (
         <BookTable books={books} loading={loading} />
       ) : (
@@ -132,7 +139,15 @@ export default function Home() {
       
       {/* Loading indicator */}
       <div ref={ref} className="py-4 text-center">
-        {loading && <p>Loading more books...</p>}
+        {loading && (
+          <div className="flex justify-center">
+            <div className="animate-pulse flex space-x-2">
+              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+              <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
