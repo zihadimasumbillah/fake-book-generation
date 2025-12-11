@@ -14,7 +14,7 @@
     "axios": "^1.8.4",
     "framer-motion": "^12.6.2",
     "lorem-ipsum": "^2.0.8",
-    "next": "15.2.4",
+    "next": "15.2.6",
     "papaparse": "^5.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
